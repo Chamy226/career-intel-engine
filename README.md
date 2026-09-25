@@ -110,7 +110,7 @@ brew install pango cairo gdk-pixbuf libffi
 ### 1. Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/career-intel-engine.git
+git clone https://github.com/Chamy226/career-intel-engine.git
 cd career-intel-engine
 ```
 
