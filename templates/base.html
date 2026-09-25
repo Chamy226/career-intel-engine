@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ profile.name }}{% if job_title %} — {{ job_title }}{% endif %}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 14mm;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      color: #111111;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+      line-height: 1.28;
+    }
+
+    h1, h2, h3, p, ul, li {
+      display: block;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      float: none;
+      position: static;
+    }
+
+    h1 {
+      font-size: 16.5pt;
+      font-weight: 700;
+      letter-spacing: 0.2pt;
+      line-height: 1.15;
+      margin: 0 0 2pt 0;
+    }
+
+    .headline {
+      font-size: 10.5pt;
+      font-weight: 700;
+      margin: 0 0 3pt 0;
+    }
+
+    .contact, .links {
+      font-size: 9pt;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .links { margin-bottom: 8pt; }
+
+    h2 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7pt;
+      margin: 9pt 0 4pt 0;
+      padding: 0 0 2pt 0;
+      border-bottom: 0.75pt solid #111111;
+    }
+
+    h3 {
+      font-size: 10pt;
+      font-weight: 700;
+      margin: 6pt 0 1pt 0;
+    }
+
+    .meta {
+      font-size: 9pt;
+      margin: 0 0 2pt 0;
+    }
+
+    p { margin: 0 0 4pt 0; }
+
+    ul {
+      margin: 0 0 2pt 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      display: block;
+      margin: 0 0 2.5pt 0;
+      padding: 0 0 0 11pt;
+      text-indent: -11pt;
+    }
+
+    .page-break {
+      break-before: page;
+      page-break-before: always;
+    }
+
+    .skill-line, .cert-line {
+      margin: 0 0 2pt 0;
+    }
+
+    .target {
+      margin: 0 0 2pt 0;
+      font-size: 9.5pt;
+    }
+
+    /* Human-review variant stays single-column; only ink color changes. */
+    body:not(.ats-strict) h1,
+    body:not(.ats-strict) h2 {
+      color: #102a43;
+    }
+    body:not(.ats-strict) h2 {
+      border-bottom-color: #102a43;
+    }
+
+    /*
+      Greenhouse / Lever: no tables, columns, graphics, headers, or footers.
+      Parsers read left-to-right and drop sidebars; tables scramble extraction.
+    */
+    body.ats-strict table,
+    body.ats-strict thead,
+    body.ats-strict tbody,
+    body.ats-strict tr,
+    body.ats-strict td,
+    body.ats-strict th,
+    body.ats-strict img,
+    body.ats-strict svg,
+    body.ats-strict canvas,
+    body.ats-strict header,
+    body.ats-strict footer,
+    body.ats-strict aside,
+    body.ats-strict nav {
+      display: none !important;
+    }
+
+    body.ats-strict,
+    body.ats-strict h1,
+    body.ats-strict h2,
+    body.ats-strict h3,
+    body.ats-strict p,
+    body.ats-strict ul,
+    body.ats-strict li {
+      color: #000000;
+      background: none;
+      box-shadow: none;
+    }
+
+    body.ats-strict h2 {
+      border-bottom: 0.75pt solid #000000;
+    }
+  </style>
+</head>
+<body class="{% if ats_strict %}ats-strict{% endif %}">
+  <h1>{{ profile.name }}</h1>
+  <p class="headline">{{ profile.title }}</p>
+  <p class="contact">{{ profile.contact }}</p>
+  <p class="links">{{ profile.links }}</p>
+
+  <h2>Summary</h2>
+  <p>{{ summary }}</p>
+  {% if job_title and company_name %}
+  <p class="target">Target role: {{ job_title }} at {{ company_name }}.</p>
+  {% endif %}
+
+  <h2>Experience</h2>
+  {% for job in profile.experience %}
+  <div class="entry">
+    <h3>{{ job.role }}</h3>
+    <p class="meta">{{ job.company }} | {{ job.location }} | {{ job.dates }}</p>
+    <ul>
+      {% for bullet in job.bullets %}
+      <li>– {{ bullet }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+
+  <h2>Skills</h2>
+  {% for category, items in profile.skills.items() %}
+  <p class="skill-line"><strong>{{ category }}:</strong> {{ items }}</p>
+  {% endfor %}
+
+  <h2 class="page-break">Projects</h2>
+  {% for project in profile.projects %}
+  <div class="entry">
+    <h3>{{ project.name }}</h3>
+    <p class="meta">{{ project.stack }}</p>
+    <ul>
+      {% for bullet in project.bullets %}
+      <li>– {{ bullet }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+
+  <h2>Education</h2>
+  {% for item in profile.education %}
+  <div class="entry">
+    <h3>{{ item.degree }}</h3>
+    <p class="meta">{{ item.school }} | {{ item.dates }} | {{ item.details }}</p>
+  </div>
+  {% endfor %}
+
+  <h2>Certifications</h2>
+  <p class="cert-line">{{ profile.certifications | join(" · ") }}</p>
+
+  <h2>Languages</h2>
+  <p>{{ profile.languages }}</p>
+</body>
+</html>

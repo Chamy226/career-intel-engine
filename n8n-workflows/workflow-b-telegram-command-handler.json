@@ -1,0 +1,139 @@
+{
+  "name": "Workflow B: Telegram Command Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "b2000001-0000-4000-8000-000000000001",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "career-intel-telegram-commands",
+      "credentials": {
+        "telegramApi": {
+          "id": "tgBotCareerIntel01",
+          "name": "Career Intel Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = String($json.message?.text || $json.text || '').trim();\nconst chatId = $json.message?.chat?.id ?? $json.chat?.id ?? null;\n\nconst patterns = [\n  { re: /^\\/applied(\\d+)\\b/i, status: 'Applied' },\n  { re: /^\\/stage(\\d+)\\b/i, status: 'Tech Interview' },\n  { re: /^\\/reject(\\d+)\\b/i, status: 'Rejected' },\n];\n\nfor (const { re, status } of patterns) {\n  const match = text.match(re);\n  if (match) {\n    return [{\n      json: {\n        job_number: Number(match[1]),\n        new_status: status,\n        chat_id: chatId,\n        raw_text: text,\n      },\n    }];\n  }\n}\n\n// No command match -> stop branch\nreturn [];"
+      },
+      "id": "b2000001-0000-4000-8000-000000000002",
+      "name": "Parse Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_FASTAPI_HOST:8000/update-job-status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ job_number: $json.job_number, new_status: $json.new_status }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "b2000001-0000-4000-8000-000000000003",
+      "name": "POST update-job-status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Command').item.json.chat_id }}",
+        "text": "={{ `\u2705 Updated Job #${$('Parse Command').item.json.job_number} to *${$('Parse Command').item.json.new_status}*.` }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "b2000001-0000-4000-8000-000000000004",
+      "name": "Telegram Confirm",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        840,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "tgBotCareerIntel01",
+          "name": "Career Intel Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Command": {
+      "main": [
+        [
+          {
+            "node": "POST update-job-status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST update-job-status": {
+      "main": [
+        [
+          {
+            "node": "Telegram Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Bangkok"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}

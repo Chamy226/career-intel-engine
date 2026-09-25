@@ -1,0 +1,39 @@
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+deploy/n8n/.env
+**/.env
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Runtime artifacts
+*.log
+server.log
+output/*.pdf
+output/*.html
+output/preview/
+!output/.gitkeep
+
+# Local profile / candidate data
+profile.json
+
+# Temporary / scratch
+tmp/
+*.tmp
+.ngrok/
